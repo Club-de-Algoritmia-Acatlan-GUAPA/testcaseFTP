@@ -26,7 +26,7 @@ WORKDIR /app/testcaseFTP
 RUN rustup target add x86_64-unknown-linux-gnu 
 COPY ./primitypes /app/primitypes
 RUN cargo chef cook --release --target x86_64-unknown-linux-gnu --recipe-path recipe.json
-COPY ./testcaseFTP /app/testcaseFTP
+COPY ./testcase-ftp /app/testcaseFTP
 RUN cargo build --release --target x86_64-unknown-linux-gnu --bin testcaseFTP
 
 FROM bitnami/minideb:latest as end
