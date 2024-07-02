@@ -10,7 +10,7 @@ WORKDIR /app
 
 
 FROM chef AS planner
-COPY ./testcaseFTP /app/testcaseFTP
+COPY ./testcase-ftp /app/testcaseFTP
 COPY ./primitypes /app/primitypes
 WORKDIR /app/testcaseFTP
 RUN cargo chef prepare --recipe-path recipe.json
