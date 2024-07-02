@@ -1,5 +1,5 @@
 use libunftp::Server;
-use testfileFTP::configuration::get_configuration;
+use testcaseFTP::configuration::get_configuration;
 use unftp_sbe_fs::ServerExt;
 
 #[tokio::main]
