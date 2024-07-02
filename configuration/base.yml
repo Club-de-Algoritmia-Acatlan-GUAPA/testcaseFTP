@@ -1,0 +1,6 @@
+ftp:
+  host: '127.0.0.1'
+  port: 2121
+  username: ''
+ftp_home: '/Users/yollotl/guapa/judge/juez_guapa/backend/testcaseFTP/resources/'
+is_prod: true
