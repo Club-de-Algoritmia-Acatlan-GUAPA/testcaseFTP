@@ -9,6 +9,7 @@ use axum::{
 use futures::{Stream, TryStreamExt};
 use tokio::{fs::File, io::BufWriter};
 use tokio_util::io::StreamReader;
+use tracing::debug;
 
 use crate::state::AppState;
 
@@ -35,6 +36,7 @@ pub async fn post_create_file(
     Path(dir_id): Path<String>,
     mut multipart: Multipart,
 ) -> Result<(), (StatusCode, String)> {
+    debug!("Creating file in dir {}", dir_id);
     while let Ok(Some(field)) = multipart.next_field().await {
         let file_name = if let Some(file_name) = field.file_name() {
             file_name.to_owned()
@@ -115,10 +117,12 @@ where
 
         // Create the file. `File` implements `AsyncWrite`.
         let path = std::path::Path::new(root).join(dir_id).join(path);
+        let cloned_path = path.clone();
         let mut file = BufWriter::new(File::create(path).await?);
 
         // Copy the body into the file.
         tokio::io::copy(&mut body_reader, &mut file).await?;
+        debug!("File saved to {:?}", cloned_path);
 
         Ok::<_, io::Error>(())
     }
