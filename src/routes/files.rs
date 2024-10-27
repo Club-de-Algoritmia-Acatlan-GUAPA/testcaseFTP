@@ -1,4 +1,4 @@
-use std::io;
+use std::{fs::OpenOptions, io};
 
 use axum::{
     body::Bytes,
@@ -43,6 +43,7 @@ pub async fn post_create_file(
         } else {
             continue;
         };
+        dbg!(&file_name);
 
         stream_to_file(
             state.configuration.ftp_home.as_str(),
@@ -118,7 +119,20 @@ where
         // Create the file. `File` implements `AsyncWrite`.
         let path = std::path::Path::new(root).join(dir_id).join(path);
         let cloned_path = path.clone();
-        let mut file = BufWriter::new(File::create(path).await?);
+        debug!("File saved to {:?}", cloned_path);
+        let mut file = BufWriter::new(
+            tokio::fs::OpenOptions::new()
+                .read(true)
+                .write(true)
+                .create(true)
+                .truncate(true)
+                .open(path)
+                .await
+                .map_err(|err| {
+                    dbg!(&err);
+                    err
+                })?,
+        );
 
         // Copy the body into the file.
         tokio::io::copy(&mut body_reader, &mut file).await?;
