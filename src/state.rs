@@ -21,6 +21,7 @@ pub async fn startup() -> Router<()> {
         .route("/dir/:dir_id", post(files::post_create_dir))
         .route("/file/:dir_id/:file_name", delete(files::delete_file))
         .route("/file/:dir_id/:file_name", get(files::get_file))
+        .route("/checker/:dir_id", post(files::new_checker))
         .layer(
             TraceLayer::new_for_http().make_span_with(|request: &Request<_>| {
                 // Log the matched route's path (with placeholders not filled in).

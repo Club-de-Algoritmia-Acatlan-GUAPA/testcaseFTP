@@ -34,7 +34,38 @@ async fn create_dir(root: &str, dir_id: &str) -> Result<(), (StatusCode, String)
 pub async fn post_create_file(
     State(state): State<AppState>,
     Path(dir_id): Path<String>,
+    multipart: Multipart,
+) -> Result<(), (StatusCode, String)> {
+    store_file_from_multipart(
+        multipart,
+        dir_id.as_str(),
+        state.configuration.ftp_home.as_str(),
+    )
+    .await?;
+    //while let Ok(Some(field)) = multipart.next_field().await {
+    //    let file_name = if let Some(file_name) = field.file_name() {
+    //        file_name.to_owned()
+    //    } else {
+    //        continue;
+    //    };
+    //    dbg!(&file_name);
+    //
+    //    stream_to_file(
+    //        state.configuration.ftp_home.as_str(),
+    //        dir_id.as_str(),
+    //        &file_name,
+    //        field,
+    //    )
+    //    .await?;
+    //}
+
+    Ok(())
+}
+
+pub async fn store_file_from_multipart(
     mut multipart: Multipart,
+    dir_id: &str,
+    root: &str,
 ) -> Result<(), (StatusCode, String)> {
     debug!("Creating file in dir {}", dir_id);
     while let Ok(Some(field)) = multipart.next_field().await {
@@ -45,18 +76,11 @@ pub async fn post_create_file(
         };
         dbg!(&file_name);
 
-        stream_to_file(
-            state.configuration.ftp_home.as_str(),
-            dir_id.as_str(),
-            &file_name,
-            field,
-        )
-        .await?;
+        stream_to_file(root, dir_id, &file_name, field).await?;
     }
 
     Ok(())
 }
-
 #[axum_macros::debug_handler]
 pub async fn delete_file(
     State(state): State<AppState>,
@@ -69,6 +93,34 @@ pub async fn delete_file(
         .join(dir_id)
         .join(file_name);
 
+    delete_file_tokio(path).await?;
+
+    Ok(())
+}
+
+#[axum_macros::debug_handler]
+pub async fn new_checker(
+    State(state): State<AppState>,
+    Path(dir_id): Path<String>,
+    multipart: Multipart,
+) -> Result<(), (StatusCode, String)> {
+    let checker_exe = std::path::Path::new(state.configuration.ftp_home.as_str())
+        .join(&dir_id)
+        .join("checker");
+    store_file_from_multipart(
+        multipart,
+        dir_id.as_str(),
+        state.configuration.ftp_home.as_str(),
+    )
+    .await?;
+    if let Ok(true) = tokio::fs::try_exists(&checker_exe).await {
+        delete_file_tokio(checker_exe).await?;
+    }
+
+    Ok(())
+}
+
+async fn delete_file_tokio(path: impl AsRef<std::path::Path>) -> Result<(), (StatusCode, String)> {
     tokio::fs::remove_file(path)
         .await
         .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?;
