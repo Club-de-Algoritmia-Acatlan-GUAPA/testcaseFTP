@@ -17,7 +17,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: Club-de-Algoritmia-Acatlan-GUAPA/testcaseFTP
-        path: testcaseFTP
+        path: testcase-ftp
 
     - name: Checkout Primitypes
       uses: actions/checkout@v4
@@ -38,7 +38,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./testcaseFTP/Dockerfile
+        file: ./testcase-ftp/Dockerfile
         push: true
         tags: |
           ${{ secrets.DOCKERHUB_USERNAME }}/testcase-ftp:latest
