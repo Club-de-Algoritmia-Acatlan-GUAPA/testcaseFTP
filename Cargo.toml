@@ -18,3 +18,4 @@ tokio-util = { version = "0.7.12", features = ["compat", "io"] }
 futures = "0.3.31"
 tower-http = { version = "0.6.1", features = ["trace"] }
 tracing = "0.1.40"
+primitypes = { path = "../primitypes"}

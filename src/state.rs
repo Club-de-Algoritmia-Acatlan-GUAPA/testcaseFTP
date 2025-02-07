@@ -1,9 +1,10 @@
 use axum::{
-    extract::MatchedPath,
+    extract::{DefaultBodyLimit, MatchedPath},
     http::Request,
     routing::{delete, get, post},
     Router,
 };
+use primitypes::consts::{MAX_SUBMISSION_FILE_SIZE_IN_BYTES};
 use tower_http::trace::TraceLayer;
 use tracing::{info_span, Span};
 
@@ -22,6 +23,8 @@ pub async fn startup() -> Router<()> {
         .route("/file/:dir_id/:file_name", delete(files::delete_file))
         .route("/file/:dir_id/:file_name", get(files::get_file))
         .route("/checker/:dir_id", post(files::new_checker))
+        .layer(DefaultBodyLimit::disable())
+        .layer(DefaultBodyLimit::max(MAX_SUBMISSION_FILE_SIZE_IN_BYTES))
         .layer(
             TraceLayer::new_for_http().make_span_with(|request: &Request<_>| {
                 // Log the matched route's path (with placeholders not filled in).
